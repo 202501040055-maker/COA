@@ -1,0 +1,60 @@
+%macro WRITE 2
+    mov rax,1
+    mov rdi,1
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro READ 2
+    mov rax,0
+    mov rdi,0
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro EXIT 0
+    mov rax,60
+    mov rdi,0
+    syscall
+%endmacro
+
+section .data
+    msg1 db "Enter string",10
+    len1 equ $-msg1
+    msg2 db "Reverse string is",10
+    len2 equ $-msg2
+    nl db 10
+
+section .bss
+    str1 resb 20
+    str3 resb 40
+    l1 resq 1
+
+section .text
+    global _start
+
+_start:
+    WRITE msg1,len1
+    READ str1,20
+    dec rax
+    mov [l1],rax
+
+    mov rsi,str1
+    add rsi,[l1]
+    dec rsi
+    mov rdi,str3
+    mov rcx,[l1]
+revloop:
+    mov bl,byte[rsi]
+    mov byte[rdi],bl
+    dec rsi
+    inc rdi
+    dec rcx
+    jnz revloop
+
+    WRITE msg2,len2
+    WRITE str3,[l1]
+    WRITE nl,1
+    EXIT

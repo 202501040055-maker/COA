@@ -1,0 +1,69 @@
+%macro WRITE 2
+    mov rax,1
+    mov rdi,1
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro READ 2
+    mov rax,0
+    mov rdi,0
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro EXIT 0
+    mov rax,60
+    mov rdi,0
+    syscall
+%endmacro
+
+section .data
+    msg1 db "Enter string 1",10
+    len1 equ $-msg1
+    msg2 db "Enter string 2",10
+    len2 equ $-msg2
+    msg3 db "Strings are equal",10
+    len3 equ $-msg3
+    msg4 db "Strings are not equal",10
+    len4 equ $-msg4
+
+section .bss
+    str1 resb 20
+    str2 resb 20
+    l1 resq 1
+    l2 resq 1
+
+section .text
+    global _start
+
+_start:
+    WRITE msg1,len1
+    READ str1,20
+    dec rax
+    mov [l1],rax
+
+    WRITE msg2,len2
+    READ str2,20
+    dec rax
+    mov [l2],rax
+
+    mov rbx,[l1]
+    cmp rbx,[l2]
+    jne ntequal
+    mov rsi,str1
+    mov rdi,str2
+    mov rcx,[l1]
+    CLD
+    repe cmpsb
+    jne ntequal
+    WRITE msg3,len3
+    jmp done
+
+ntequal:
+    WRITE msg4,len4
+
+done:
+    EXIT

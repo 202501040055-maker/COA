@@ -1,0 +1,237 @@
+%macro WRITE 02
+    mov rax,01H
+    mov rdi,01H
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro READ 02
+    mov rax,00H
+    mov rdi,00H
+    mov rsi,%1
+    mov rdx,%2
+    syscall
+%endmacro
+
+%macro EXIT 00
+    mov rax,60
+    mov rdi,00
+    syscall
+%endmacro
+
+
+section .data
+
+menu db 10,"1. Addition",10
+     db "2. Subtract",10
+     db "3. Multiply",10
+     db "4. Divide",10
+     db "5. Exit",10
+     db "Enter ur choice: "
+menulen equ $-menu
+
+msg1 db 10,"Enter 2 nos: ",10
+len1 equ $-msg1
+
+msg2 db "Addition is: "
+len2 equ $-msg2
+
+msg3 db "Substraction is: "
+len3 equ $-msg3
+
+msg4 db "Multiplication is: "
+len4 equ $-msg4
+
+msg5 db "Quotient is: "
+len5 equ $-msg5
+
+msg6 db "Remainder is: "
+len6 equ $-msg6
+
+msg7 db "Exit",10
+len7 equ $-msg7
+
+
+section .bss
+
+char_buff resb 17
+act1 resq 1
+a resq 1
+b resq 1
+c resq 1
+d resq 1
+choice resb 02
+
+
+section .text
+
+global _start
+
+
+_start:
+
+    WRITE msg1,len1
+
+    call accept
+    mov qword[a],rbx
+
+    call accept
+    mov qword[b],rbx
+
+
+printmenu:
+
+    WRITE menu,menulen
+    READ choice,02
+
+    cmp byte[choice],31H
+    je addition
+
+    cmp byte[choice],32H
+    je subtract
+
+    cmp byte[choice],33H
+    je multiply
+
+    cmp byte[choice],34H
+    je divide
+
+    cmp byte[choice],35H
+    je exit
+
+
+addition:
+
+    mov rbx,[a]
+    add rbx,[b]
+    mov [c],rbx
+
+    WRITE msg2,len2
+    mov rbx,[c]
+    call display
+
+    jmp printmenu
+
+
+subtract:
+
+    mov rbx,[a]
+    sub rbx,[b]
+    mov [c],rbx
+
+    WRITE msg3,len3
+    mov rbx,[c]
+    call display
+
+    jmp printmenu
+
+
+multiply:
+
+    mov rax,[a]
+    mul qword[b]
+
+    mov [c],rdx
+    mov [d],rax
+
+    WRITE msg4,len4
+
+    mov rbx,[c]
+    call display
+
+    mov rbx,[d]
+    call display
+
+    jmp printmenu
+
+
+divide:
+
+    mov rdx,00H
+    mov rax,[a]
+    div qword[b]
+
+    mov [c],rdx
+    mov [d],rax
+
+    WRITE msg5,len5
+
+    mov rbx,[d]
+    call display
+
+    WRITE msg6,len6
+
+    mov rbx,[c]
+    call display
+
+    jmp printmenu
+
+
+exit:
+
+    WRITE msg7,len7
+    EXIT
+
+
+accept:
+
+    READ char_buff,17
+    dec rax
+    mov qword[act1],rax
+
+    mov rbx,00H
+    mov rsi,char_buff
+
+up:
+
+    shl rbx,04H
+    mov rdx,00H
+
+    mov dl,byte[rsi]
+
+    cmp dl,39H
+    jbe sub30
+
+    sub dl,07H
+
+sub30:
+
+    sub dl,30H
+    add rbx,rdx
+
+    inc rsi
+    dec qword[act1]
+
+    jnz up
+    ret
+
+
+display:
+
+    mov rsi,char_buff
+    mov rcx,16
+
+above:
+
+    rol rbx,04H
+    mov dl,bl
+    and dl,0FH
+
+    cmp dl,09H
+    jbe add30
+
+    add dl,07H
+
+add30:
+
+    add dl,30H
+    mov byte[rsi],dl
+
+    inc rsi
+    dec rcx
+
+    jnz above
+
+    WRITE char_buff,16
+    ret
