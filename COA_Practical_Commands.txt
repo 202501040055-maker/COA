@@ -1,0 +1,33 @@
+1. PS: Add two numbers.
+IN 0, R00
+IN 0, R01
+SUB #48, R00
+SUB #48, R01
+ADD R01, R00
+OUT R00, 1
+HLT
+
+2. PS: Check whether a number is 5 using If-Else.
+IN 0, R00
+SUB #48, R00
+CMP #5, R00
+JEQ 30
+MOV #48, R01
+OUT R01, 1
+HLT
+MOV #49, R01
+OUT R01, 1
+HLT
+
+3. PS: Multiply two numbers using a Loop.
+IN 0, R00
+IN 0, R01
+SUB #48, R00
+SUB #48, R01
+MOV #0, R02
+ADD R00, R02
+DEC R01
+JNZ 30
+ADD #48, R02
+OUT R02, 1
+HLT
